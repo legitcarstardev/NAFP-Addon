@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "omegaware-addons",
+  "version": "${version}",
+  "name": "NAFP-Addon",
+  "description": "Addons for Meteor Client",
+  "authors": [
+    "LegitCarStar"
+  ],
+  "contact": {
+    "repo": "https://github.com/Omega172/OmegaWare-Addons"
+  },
+  "icon": "assets/icon/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "meteor": [
+      "xyz.omegaware.addon.OmegawareAddons"
+    ]
+  },
+  "mixins": [
+    "omegaware-addons.mixins.json"
+  ],
+  "custom": {
+    "meteor-client:color": "204,255,102",
+    "omegaware-addons:commit": "${commit}"
+  },
+  "depends": {
+    "java": ">=25",
+    "minecraft": ["${mc_version}"],
+    "meteor-client": "*"
+  }
+}
