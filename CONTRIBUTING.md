@@ -1,4 +1,4 @@
-# Contributing to OmegaWare-Addons
+# Contributing to NAFP-Addon
 
 Thank you for your interest in contributing!
 
