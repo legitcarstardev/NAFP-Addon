@@ -59,12 +59,12 @@ public class OmegawareAddons extends MeteorAddon {
 
     @Override
     public String getWebsite() {
-        return "https://github.com/Omega172/OmegaWare-Addons";
+        return "https://github.com/legitcarstardev/NAFP-Addon";
     }
 
     @Override
     public GithubRepo getRepo() {
-        return new GithubRepo("Omega172", "OmegaWare-Addons", "1.21.4", null);
+        return new GithubRepo("legitcarstardev", "NAFP-Addon", "main", null);
     }
 
     @Override
