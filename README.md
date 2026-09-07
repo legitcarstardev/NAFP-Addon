@@ -1,33 +1,6 @@
-# OmegaWare Addons (For Meteor Client)
+# NAFP Addons (For Meteor Client)
 
 ## Features
-- **TPA Automations**:
-  - Automatically accepts teleport requests from approved users.
-  - Can automatically deny teleport requests from unapproved users.
-  - Can filter out the servers teleport messages so they are not shown in chat.
-  - Has various settings to log when specific actions are taken.
-  - **Made for the play.6b6t.org server**.
-- **6B6T Chat Filter**:
-  - Can filter out specific messages from chat based on the criteria you set.
-  - Can filter out messages from specific users.
-  - Can filter the chat to only show messages from users with a rank.
-- **Beacon Range**:
-  - Displays the range of powered beacons.
-  - The range box's color can be changed.
-  - There is a setting to cull overlapping sections of range boxes.
-- **TSR Clan KitBot API**: Disabled for now API not ready
-  - Check your token balance.
-  - Order kits
-  - List your active, pending, completed, and failed orders.
-  - Cancel orders.
-  - Send tokens to other users.
-- **6B6T Item Frame Dupe**
-  - Shamelessly taken from [rusher-auto-item-frame-dupe](https://github.com/kybe236/rusher-auto-item-frame-dupe/)
-  - With some slight bug fixes and improvements
-- **Better Stash Finder**
-  - It is practically an exact copy of meteors stash finder
-  - Added disconnect on stash found which will also disable auto reconnect if it triggers
-  - Changed default values and increased slider maximum values
 - **Better Baritone Build**
   - Add some improvements to the baritone build command
   - Can refill items from any storage block
