@@ -199,12 +199,31 @@ class StorageRegistry {
                 }
                 mc.setScreen(null); // Close any open screens to ensure that we can interact with the storage block
 
-                Vec3 hitPos = Vec3.atCenterOf(storage.blockPos);
-                BlockHitResult hit = new BlockHitResult(hitPos, Direction.UP, storage.blockPos, false);
+                // Baritone's GoalGetToBlock just gets adjacent to the block - it could stop on any side
+                // (north/south/east/west/above/below), not specifically above it. Always claiming the top
+                // face (regardless of where the player actually is) sends a hit result that doesn't match
+                // a real raycast from the player's position, which gets silently rejected by anything that
+                // validates reach/facing - explaining intermittent failures to open. Instead, work out
+                // which face is actually closest to the player and click that one.
+                Vec3 blockCenter = Vec3.atCenterOf(storage.blockPos);
+                Vec3 eyeToCenter = blockCenter.subtract(mc.player.getEyePosition());
+
+                double ax = Math.abs(eyeToCenter.x), ay = Math.abs(eyeToCenter.y), az = Math.abs(eyeToCenter.z);
+                Direction face;
+                if (ay >= ax && ay >= az) {
+                    face = eyeToCenter.y > 0 ? Direction.DOWN : Direction.UP;
+                } else if (ax >= az) {
+                    face = eyeToCenter.x > 0 ? Direction.WEST : Direction.EAST;
+                } else {
+                    face = eyeToCenter.z > 0 ? Direction.NORTH : Direction.SOUTH;
+                }
+
+                Vec3 hitPos = blockCenter.add(face.getStepX() * 0.5, face.getStepY() * 0.5, face.getStepZ() * 0.5);
+                BlockHitResult hit = new BlockHitResult(hitPos, face, storage.blockPos, false);
 
                 InteractionResult result = mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit); // Attempt to interact with the block
                 if (OmegawareAddons.BETTER_BARITONE_BUILD.debugMode.get()) {
-                    Logger.info("Attempted interact with block at %s, result: %s", storage.blockPos, result.consumesAction());
+                    Logger.info("Attempted interact with block at %s (face: %s), result: %s", storage.blockPos, face, result.consumesAction());
                 }
 
                 if (result.consumesAction()) // If the interaction was successful, we can then make the player swing their hand
