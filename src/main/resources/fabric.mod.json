@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "omegaware-addons",
+  "id": "nafp-addon",
   "version": "${version}",
   "name": "NAFP-Addon",
   "description": "Addons for Meteor Client",
@@ -18,11 +18,11 @@
     ]
   },
   "mixins": [
-    "omegaware-addons.mixins.json"
+    "nafp-addon.mixins.json"
   ],
   "custom": {
     "meteor-client:color": "204,255,102",
-    "omegaware-addons:commit": "${commit}"
+    "nafp-addon:commit": "${commit}"
   },
   "depends": {
     "java": ">=25",

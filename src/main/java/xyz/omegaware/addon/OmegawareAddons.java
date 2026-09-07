@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import java.io.File;
 
 public class OmegawareAddons extends MeteorAddon {
-    public static final String MOD_ID = "omegaware-addons";
+    public static final String MOD_ID = "nafp-addon";
     public static ModMetadata MOD_META;
     public static final Logger LOG = LogUtils.getLogger();
     public static final Category CATEGORY = new Category("OmegaWare");
