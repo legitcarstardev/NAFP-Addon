@@ -20,8 +20,8 @@ public class OmegawareAddons extends MeteorAddon {
     public static final String MOD_ID = "nafp-addon";
     public static ModMetadata MOD_META;
     public static final Logger LOG = LogUtils.getLogger();
-    public static final Category CATEGORY = new Category("OmegaWare");
-    public static final HudGroup HUD_GROUP = new HudGroup("OmegaWare");
+    public static final Category CATEGORY = new Category("NAFP");
+    public static final HudGroup HUD_GROUP = new HudGroup("NAFP");
 
     public static BetterBaritoneBuild BETTER_BARITONE_BUILD = null;
 

@@ -620,8 +620,16 @@ public class BetterBaritoneBuild extends Module {
         FetchRegistry.INSTANCE.clear();
         materialShortagePos = null;
 
-        StorageRegistry.INSTANCE.load();
-        Home.INSTANCE.load();
+        // GetConfigFile() scopes the save path by the current world/server name (Utils.getFileWorldName()),
+        // which returns "" when mc.level is null - i.e. whenever this module activates before you've
+        // actually joined a world (common, since Meteor reactivates modules on launch before you've
+        // connected to anything). Loading here in that case would read from the wrong ("") folder and
+        // look empty even though the real per-server save file is untouched. Only load here if we're
+        // already connected; otherwise onServerConnectEnd() below picks it up once we actually are.
+        if (mc.level != null) {
+            StorageRegistry.INSTANCE.load();
+            Home.INSTANCE.load();
+        }
 
         if (preventMining.get()) setAllowBreak(false);
         applyIgnoredBlocks();
@@ -634,8 +642,12 @@ public class BetterBaritoneBuild extends Module {
         EventRegistry.INSTANCE.clear();
         FetchRegistry.INSTANCE.clear();
 
-        StorageRegistry.INSTANCE.save();
-        Home.INSTANCE.save();
+        // Same reasoning as onActivate() - only save under the real per-server path, not the "" one
+        // used when mc.level is null (e.g. deactivating during shutdown after the world's unloaded).
+        if (mc.level != null) {
+            StorageRegistry.INSTANCE.save();
+            Home.INSTANCE.save();
+        }
 
         setAllowBreak(true); // Restore Baritone's original allowBreak value, if we changed it
         clearIgnoredBlocks();
@@ -769,7 +781,11 @@ public class BetterBaritoneBuild extends Module {
     public void onServerConnectEnd(ServerConnectEndEvent event) {
         if (!isActive()) return;
 
+        // Now that we're actually connected, Utils.getFileWorldName() resolves to the real per-server
+        // folder - reload both here so a module that was activated before connecting (or reactivated
+        // on launch) still picks up its saved data instead of staying empty.
         StorageRegistry.INSTANCE.load();
+        Home.INSTANCE.load();
     }
 
     @EventHandler
