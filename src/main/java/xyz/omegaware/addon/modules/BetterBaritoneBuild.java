@@ -519,6 +519,29 @@ public class BetterBaritoneBuild extends Module {
         .build()
     );
 
+    private final Setting<Boolean> buildInLayers = sgGeneral.add(new BoolSetting.Builder()
+        .name("build-in-layers")
+        .description("If enabled, Baritone builds strictly layer by layer (bottom-up) and will not move on to the next layer while the current one still has anything left it's able to place - it won't skip ahead just because a layer is incomplete.")
+        .defaultValue(false)
+        .onChanged(enabled -> {
+            if (isActive()) applyBuildInLayers(enabled);
+        })
+        .build()
+    );
+
+    private final Setting<Integer> layerHeight = sgGeneral.add(new IntSetting.Builder()
+        .name("layer-height")
+        .description("How many Y-levels make up one layer when build-in-layers is enabled.")
+        .defaultValue(1)
+        .min(1)
+        .sliderRange(1, 16)
+        .visible(buildInLayers::get)
+        .onChanged(height -> {
+            if (isActive() && buildInLayers.get()) BaritoneAPI.getSettings().layerHeight.value = height;
+        })
+        .build()
+    );
+
     private final Setting<Integer> homeIfStuckTimeout = sgGeneral.add(new IntSetting.Builder()
         .name("home-if-stuck-timeout")
         .description("The timeout in seconds before Baritone returns to the home point if it gets stuck.")
@@ -635,6 +658,9 @@ public class BetterBaritoneBuild extends Module {
     private BlockPos materialShortagePos = null; // where the player was standing when Baritone first reported missing materials
     private Boolean savedAllowBreak = null; // Baritone's original allowBreak / buildIgnoreExisting values, while
     private Boolean savedBuildIgnoreExisting = null; // prevent-mining has overridden them
+    private Boolean savedBuildInLayers = null; // Baritone's original buildInLayers / skipFailedLayers / layerHeight
+    private Boolean savedSkipFailedLayers = null; // values, while build-in-layers has overridden them
+    private Integer savedLayerHeight = null;
     private final List<Block> appliedIgnoredBlocks = new ArrayList<>(); // blocks we've personally added to Baritone's okIfAir list
     private long lastRepeatTime = 0;
 
@@ -665,6 +691,7 @@ public class BetterBaritoneBuild extends Module {
         }
 
         if (preventMining.get()) setAllowBreak(false);
+        if (buildInLayers.get()) applyBuildInLayers(true);
         applyIgnoredBlocks();
         lastRepeatTime = System.currentTimeMillis();
     }
@@ -683,6 +710,7 @@ public class BetterBaritoneBuild extends Module {
         }
 
         setAllowBreak(true); // Restore Baritone's original allowBreak value, if we changed it
+        applyBuildInLayers(false);
         clearIgnoredBlocks();
     }
 
@@ -707,6 +735,33 @@ public class BetterBaritoneBuild extends Module {
             BaritoneAPI.getSettings().buildIgnoreExisting.value = savedBuildIgnoreExisting;
             savedAllowBreak = null;
             savedBuildIgnoreExisting = null;
+        }
+    }
+
+    /**
+     * Enables or disables Baritone's strict layer-by-layer build order. Baritone's BuilderProcess only
+     * advances to the next layer early when it can't make progress on the current one AND both
+     * buildInLayers and skipFailedLayers are true - so forcing skipFailedLayers off here is what actually
+     * guarantees it never moves on while the current layer still has anything left to do. Remembers the
+     * previous values so they can be restored when this module deactivates or the setting is turned off.
+     */
+    private void applyBuildInLayers(boolean enabled) {
+        if (enabled) {
+            if (savedBuildInLayers == null) {
+                savedBuildInLayers = BaritoneAPI.getSettings().buildInLayers.value;
+                savedSkipFailedLayers = BaritoneAPI.getSettings().skipFailedLayers.value;
+                savedLayerHeight = BaritoneAPI.getSettings().layerHeight.value;
+            }
+            BaritoneAPI.getSettings().buildInLayers.value = true;
+            BaritoneAPI.getSettings().skipFailedLayers.value = false;
+            BaritoneAPI.getSettings().layerHeight.value = layerHeight.get();
+        } else if (savedBuildInLayers != null) {
+            BaritoneAPI.getSettings().buildInLayers.value = savedBuildInLayers;
+            BaritoneAPI.getSettings().skipFailedLayers.value = savedSkipFailedLayers;
+            BaritoneAPI.getSettings().layerHeight.value = savedLayerHeight;
+            savedBuildInLayers = null;
+            savedSkipFailedLayers = null;
+            savedLayerHeight = null;
         }
     }
 
