@@ -206,7 +206,8 @@ class StorageRegistry {
                 // validates reach/facing - explaining intermittent failures to open. Instead, work out
                 // which face is actually closest to the player and click that one.
                 Vec3 blockCenter = Vec3.atCenterOf(storage.blockPos);
-                Vec3 eyeToCenter = blockCenter.subtract(mc.player.getEyePosition());
+                Vec3 eyePos = mc.player.getEyePosition();
+                Vec3 eyeToCenter = blockCenter.subtract(eyePos);
 
                 double ax = Math.abs(eyeToCenter.x), ay = Math.abs(eyeToCenter.y), az = Math.abs(eyeToCenter.z);
                 Direction face;
@@ -219,6 +220,19 @@ class StorageRegistry {
                 }
 
                 Vec3 hitPos = blockCenter.add(face.getStepX() * 0.5, face.getStepY() * 0.5, face.getStepZ() * 0.5);
+
+                // Baritone's own placement/breaking code always rotates the player to actually face the
+                // computed hit point before sending the interaction - a claimed hit result that doesn't
+                // match the player's real look direction is exactly the kind of client/server mismatch
+                // reach and rotation validation rejects. Do the same here instead of leaving the player
+                // looking wherever they happened to be when the path finished.
+                Vec3 lookDelta = hitPos.subtract(eyePos);
+                double horizontalDist = Math.sqrt(lookDelta.x * lookDelta.x + lookDelta.z * lookDelta.z);
+                float yaw = (float) (Math.toDegrees(Math.atan2(lookDelta.z, lookDelta.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.atan2(lookDelta.y, horizontalDist));
+                mc.player.setYRot(yaw);
+                mc.player.setXRot(pitch);
+
                 BlockHitResult hit = new BlockHitResult(hitPos, face, storage.blockPos, false);
 
                 InteractionResult result = mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit); // Attempt to interact with the block

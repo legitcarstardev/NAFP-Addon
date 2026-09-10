@@ -206,7 +206,8 @@ class StorageRegistry {
                 // validates reach/facing - explaining intermittent failures to open. Instead, work out
                 // which face is actually closest to the player and click that one.
                 Vec3d blockCenter = Vec3d.ofCenter(storage.blockPos);
-                Vec3d eyeToCenter = blockCenter.subtract(mc.player.getEyePos());
+                Vec3d eyePos = mc.player.getEyePos();
+                Vec3d eyeToCenter = blockCenter.subtract(eyePos);
 
                 double ax = Math.abs(eyeToCenter.x), ay = Math.abs(eyeToCenter.y), az = Math.abs(eyeToCenter.z);
                 Direction face;
@@ -219,6 +220,19 @@ class StorageRegistry {
                 }
 
                 Vec3d hitPos = blockCenter.add(face.getOffsetX() * 0.5, face.getOffsetY() * 0.5, face.getOffsetZ() * 0.5);
+
+                // Baritone's own placement/breaking code always rotates the player to actually face the
+                // computed hit point before sending the interaction - a claimed hit result that doesn't
+                // match the player's real look direction is exactly the kind of client/server mismatch
+                // reach and rotation validation rejects. Do the same here instead of leaving the player
+                // looking wherever they happened to be when the path finished.
+                Vec3d lookDelta = hitPos.subtract(eyePos);
+                double horizontalDist = Math.sqrt(lookDelta.x * lookDelta.x + lookDelta.z * lookDelta.z);
+                float yaw = (float) (Math.toDegrees(Math.atan2(lookDelta.z, lookDelta.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.atan2(lookDelta.y, horizontalDist));
+                mc.player.setYaw(yaw);
+                mc.player.setPitch(pitch);
+
                 BlockHitResult hit = new BlockHitResult(hitPos, face, storage.blockPos, false);
 
                 ActionResult result = mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit); // Attempt to interact with the block
@@ -899,8 +913,8 @@ public class BetterBaritoneBuild extends Module {
         int index = msg.indexOf("[baritone]");
 
         msg = msg.substring(index+10).trim(); // Remove the "[Baritone]" part
-        // 10x block{MinecraftClient:black_concrete}[axis=x] 86x block{MinecraftClient:red_concrete} 1x block{MinecraftClient:birch_log}[axis=y]
-        if (msg.matches("\\d+x block\\{MinecraftClient:[a-z_]+}.*")) {
+        // 10x block{minecraft:black_concrete}[axis=x] 86x block{minecraft:red_concrete} 1x block{minecraft:birch_log}[axis=y]
+        if (msg.matches("\\d+x block\\{minecraft:[a-z_]+}.*")) {
             String[] parts = msg.split(" ");
 
             String blockCount = parts[0].replace("x", "").trim();
