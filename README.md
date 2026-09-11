@@ -8,7 +8,6 @@ NAFP Addons is a small collection of addons for the Meteor Client that extend an
   - Improvements to the Baritone build command for more reliable builds.
   - Can refill items from any storage block.
   - Works well together with Litematica printing tools such as [Litematica Printer](https://github.com/aleksilassila/litematica-printer) or [Meteor Litematica Printer](https://github.com/kkllffaa/meteor-litematica-printer).
-  - Video tutorial on how to use it: https://youtu.be/mpK_ld8JH34
 
 ## Installation
 
