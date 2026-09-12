@@ -41,26 +41,13 @@ version = properties["mod_version"] as String
 group = properties["maven_group"] as String
 
 // src/common/java: files with no Minecraft-version-specific code (shared across every target).
-// src/main/java: Mojang-mapped modules - only used for unobfuscated (26.1+) targets.
-// src/legacy/java: Yarn-mapped modules - used for every obfuscated (pre-26.1) target.
-// Only BetterBaritoneBuild is ported for any target; the addon's other modules/commands/HUDs are
-// excluded (not deleted) from the modern source set, and were never added to the legacy one.
+// src/main/java: Mojang-mapped BetterBaritoneBuild - only used for unobfuscated (26.1+) targets.
+// src/legacy/java: Yarn-mapped BetterBaritoneBuild - used for every obfuscated (pre-26.1) target.
+// The addon's other original modules/commands/HUDs were removed entirely - this addon is Baritone-only.
 extensions.configure<SourceSetContainer> {
     named("main") {
         java {
             setSrcDirs(listOf("src/common/java", if (isUnobfuscated) "src/main/java" else "src/legacy/java"))
-
-            if (isUnobfuscated) {
-                exclude("xyz/omegaware/addon/commands/**")
-                exclude("xyz/omegaware/addon/hud/**")
-                exclude("xyz/omegaware/addon/modules/BeaconRangeModule.java")
-                exclude("xyz/omegaware/addon/modules/BetterStashFinderModule.java")
-                exclude("xyz/omegaware/addon/modules/ChatFilterModule.java")
-                exclude("xyz/omegaware/addon/modules/ItemFrameDupeModule.java")
-                exclude("xyz/omegaware/addon/modules/TPAAutomationModule.java")
-                exclude("xyz/omegaware/addon/modules/TSRKitBotModule.java")
-                exclude("xyz/omegaware/addon/utils/ServerCheck.java")
-            }
         }
     }
 }
